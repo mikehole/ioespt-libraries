@@ -4,19 +4,44 @@
 
 #include "IoesptProvisioning.h"
 
+
+
 IoesptProvisioning::IoesptProvisioning()
 {
-
+	wifi.ssid = "virginmedia5388578";
+	wifi.password = "wtjjldlr";
 }
 
 void IoesptProvisioning::loadSettings(JsonObject& root)
 {
+	DEBUG_WMS("Loading settings. wifiSettings: ");
 
+	if (root.containsKey("wifiSettings"))
+	{
+		DEBUG_WMF("Found");
+
+		JsonObject& wifiSettings = root["wifiSettings"];
+
+		wifi.ssid = wifiSettings.get<const char*>("ssid");
+
+		DEBUG_WMS("ssid : "); DEBUG_WMF(wifi.ssid);
+
+		wifi.password = wifiSettings.get<const char*>("password");
+
+		DEBUG_WMS("password : "); DEBUG_WMF(wifi.password);
+	}
+	else
+	{
+		DEBUG_WMF("Not Found");
+	}
 }
 
 void IoesptProvisioning::saveSettings(JsonObject& root)
 {
+	JsonObject&	azureSettings = root.createNestedObject("wifiSettings");
 
+	azureSettings.set<const char*>("ssid", wifi.ssid);
+	azureSettings.set<const char*>("password", wifi.password);
 }
 
 

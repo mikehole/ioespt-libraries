@@ -13,11 +13,16 @@
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
 
-
+struct WifiConfig {
+	const char *ssid;
+	const char *password;
+};
 
 class IoesptProvisioning
 {
 public:
+	WifiConfig wifi;
+
 	IoesptProvisioning();
 
 	void setupConfigPortal();

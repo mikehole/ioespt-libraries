@@ -46,13 +46,35 @@ IoesptAzure::IoesptAzure()
 
 void IoesptAzure::loadSettings(JsonObject& root)
 {
+	DEBUG_WMS("Loading settings. azureSettings: ");
+	
 	if (root.containsKey("azureSettings"))
 	{
+		DEBUG_WMF("Found");
+
 		JsonObject& azureSettings = root["azureSettings"];
 
+		DEBUG_WMSL("Boo!");
+
 		cloud.host = azureSettings.get<const char*>("host");
+
+		DEBUG_WMS("Host : "); DEBUG_WMF( cloud.host );
+
 		cloud.id = azureSettings.get<const char*>("id");
+
+		DEBUG_WMS("id : "); DEBUG_WMF(cloud.id);
+
+		String keyString = azureSettings.get<String>("key");
+		
+		cloud.key = &keyString[0u];
+
+		DEBUG_WMS("key : "); DEBUG_WMF(cloud.key);
+
 		//cloud.key = azureSettings.get<char*>("key");
+	}
+	else
+	{
+		DEBUG_WMF("Not Found");
 	}
 }
 
@@ -70,7 +92,8 @@ void IoesptAzure::start()
 {
 	server.reset(new ESP8266WebServer(8080));
 
-	server->on("/", std::bind(&IoesptAzure::handleRoot, this));
+	server->on("/getsettings", std::bind(&IoesptAzure::handleGetSettings, this));
+	server->on("/putsettings", std::bind(&IoesptAzure::handleSetSettings, this));
 
 	server->begin();
 	DEBUG_WMSL("HTTP server started");
@@ -85,9 +108,26 @@ void IoesptAzure::processRequests()
 ///////////////////////////
 // Server Handlers
 
-void IoesptAzure::handleRoot() {
+void IoesptAzure::handleGetSettings() {
 
-	DEBUG_WMSL(F("Handle root"));
+	DEBUG_WMSL(F("handleGetSettings"));
+
+	StaticJsonBuffer<1000> jsonBuffer;
+
+	JsonObject& root = jsonBuffer.createObject();
+
+	saveSettings(root);
+
+	String out;
+
+	int length = root.printTo(out);
+
+	server->send(200, "text/plain", out);
+}
+
+void IoesptAzure::handleSetSettings() {
+
+	DEBUG_WMSL(F("handleSetSettings"));
 
 	server->send(200, "text/plain", "hello from esp8266!");
 }
@@ -127,7 +167,9 @@ void IoesptAzure::connectToAzure() {
 	DEBUG_WMS(cloud.id);
 	DEBUG_WMC(" connecting to ");
 	DEBUG_WMF(cloud.host);
+	
 	if (WiFi.status() != WL_CONNECTED) { return; }
+	
 	if (!tlsClient.connect(cloud.host, 443)) {      // Use WiFiClientSecure class to create TLS connection
 		DEBUG_WMS("Host connection failed.  WiFi IP Address: ");
 		DEBUG_WMF(WiFi.localIP());
