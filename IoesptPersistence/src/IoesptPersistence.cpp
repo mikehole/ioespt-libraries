@@ -14,15 +14,15 @@ void IoesptPersistance::loadSettings(LoadCallbackType callback)
 
 	StaticJsonBuffer<1000> jsonBuffer;
 
-	length = word(EEPROM.read(0), EEPROM.read(1));
+	int bufferLength = word(EEPROM.read(0), EEPROM.read(1));
 
 	DEBUG_WMS("Eprom contents length:");
-	DEBUG_WMF(length);
+	DEBUG_WMF(bufferLength);
 
 
 	int address = 2;
 
-	for (address = 2; address < length + 2; address++) {
+	for (address = 2; address < bufferLength + 2; address++) {
 		buffer[address - 2] = EEPROM.read(address);
 	}
 
@@ -33,14 +33,18 @@ void IoesptPersistance::loadSettings(LoadCallbackType callback)
 
 	JsonObject& root = jsonBuffer.parseObject(buffer);
 
-	callback(root);
+	if (root.success())
+		callback(root);
+	else
+		DEBUG_WMSL("Failed to read settings JSON.");
+	
 }
 
 void IoesptPersistance::saveSettings(SaveCallbackType callback)
 {
 	EEPROM.begin(BufferLen + 2);
 	
-	StaticJsonBuffer<1000> jsonBuffer;
+	StaticJsonBuffer<2000> jsonBuffer;
 
 	JsonObject& root = jsonBuffer.createObject();
 	
@@ -48,7 +52,7 @@ void IoesptPersistance::saveSettings(SaveCallbackType callback)
 
 	root.prettyPrintTo(Serial);
 
-	length = root.printTo(buffer, length);
+	int bufferLength = root.printTo(buffer, length);
 
 	DEBUG_WMS("Saving Eprom contents length:");
 	DEBUG_WMF(length);
@@ -56,9 +60,9 @@ void IoesptPersistance::saveSettings(SaveCallbackType callback)
 	root.prettyPrintTo(Serial);
 	DEBUG_WMF("");
 
-	EEPROM.write(0, highByte(length));
-	EEPROM.write(1, lowByte(length));
-	for (int address = 2; address < length + 2; address++) {
+	EEPROM.write(0, highByte(bufferLength));
+	EEPROM.write(1, lowByte(bufferLength));
+	for (int address = 2; address < bufferLength + 2; address++) {
 		EEPROM.write(address, buffer[address - 2]);
 	}
 	EEPROM.commit();

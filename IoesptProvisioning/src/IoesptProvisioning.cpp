@@ -125,18 +125,22 @@ void IoesptProvisioning::handleSetWifiSettings()
 {
 	DEBUG_WMSL("handleSetWifiSettings");
 
-	wifi.ssid = server->arg("ssid");
+	StaticJsonBuffer<10> jsonBuffer;
 
-	DEBUG_WMS("ssid : "); DEBUG_WMF(wifi.ssid);
+	JsonObject& root = jsonBuffer.parseObject(server->arg("plain"));
 
-	wifi.password = server->arg("password");
+	if (root.success())
+	{
+		wifi.ssid = root.get<String>("ssid");
+		wifi.password = root.get<String>("password");
 
-	DEBUG_WMS("password : "); DEBUG_WMF(wifi.password);
+		if (settingsChanged != NULL)
+			settingsChanged();
 
-	if (settingsChanged != NULL)
-		settingsChanged();
-
-	server->send(200);
+		server->send(200, "text/json", "{success:true}");
+	}
+	else
+		server->send(400, "text/json", "{error:'unable to parse JSON'}");
 }
 
 

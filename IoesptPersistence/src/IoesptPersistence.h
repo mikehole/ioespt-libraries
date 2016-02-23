@@ -12,7 +12,7 @@
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
-const int BufferLen = 2046;  // max eprom length, minus 2 for data length
+const int BufferLen = 3046;  // max eprom length, minus 2 for data length
 
 typedef void(*SaveCallbackType)(JsonObject&);
 typedef void(*LoadCallbackType)(JsonObject&);
