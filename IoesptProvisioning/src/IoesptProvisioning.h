@@ -27,7 +27,7 @@ public:
 
 	IoesptProvisioning();
 
-	void setupConfigPortal();
+	bool getConnected();
 
 	void loadSettings(JsonObject& root);
 
@@ -36,6 +36,19 @@ public:
 	SettingsChangedCallbackType settingsChanged;
 
 private:
+
+	unsigned long _configPortalTimeout = 0;
+	unsigned long _connectTimeout = 0;
+	unsigned long _configPortalStart = 0;
+	boolean       _tryWPS = false;
+
+	bool connect = false;
+
+	int connectWifi();
+
+	uint8_t waitForConnectResult();
+
+	void startWPS();
 
 	//Web server handlers
 	void handleGetWifiSettings();

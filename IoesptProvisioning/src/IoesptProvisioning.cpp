@@ -48,11 +48,22 @@ void IoesptProvisioning::saveSettings(JsonObject& root)
 /////////////////////
 //Portal
 
-void IoesptProvisioning::setupConfigPortal() 
+bool IoesptProvisioning::getConnected() 
 {
+	DEBUG_WMSL(F(""));
+
+	if (wifi.ssid != "")
+	{
+		DEBUG_WMS(F("Using previously configured SSID:"));
+		DEBUG_WMF(wifi.ssid);
+
+		if (connectWifi() == WL_CONNECTED) {
+			return true;
+		}
+	}
+	
 	server.reset(new ESP8266WebServer(80));
 
-	DEBUG_WMSL(F(""));
 
 	start = millis();
 
@@ -96,10 +107,89 @@ void IoesptProvisioning::setupConfigPortal()
 
 	DEBUG_WMSL(F("HTTP server started"));
 
-	while (true) {
+	while ( true  ) {
 		//HTTP
 		server->handleClient();
+
+		if (connect)
+		{
+			connect = false;
+			delay(2000);
+			DEBUG_WMSL(F("Connecting to new AP"));
+
+			// using user-provided  _ssid, _pass in place of system-stored ssid and pass
+			if (connectWifi() != WL_CONNECTED) {
+				DEBUG_WMSL(F("Failed to connect."));
+			}
+			else {
+				//connected
+				WiFi.mode(WIFI_STA);
+				break;
+			}
+		}
+
+		yield();
 	}
+
+	server.reset(); 
+
+	return  WiFi.status() == WL_CONNECTED;
+}
+
+int IoesptProvisioning::connectWifi() {
+	DEBUG_WMSL(F("Connecting as wifi client..."));
+
+	// check if we've got static_ip settings, if we do, use those.
+	if (_sta_static_ip) {
+		DEBUG_WMSL(F("Custom STA IP/GW/Subnet"));
+		WiFi.config(_sta_static_ip, _sta_static_gw, _sta_static_sn);
+		DEBUG_WMSL(WiFi.localIP());
+	}
+
+	WiFi.begin(&wifi.ssid[0u], &wifi.password[0u]);
+
+	int connRes = waitForConnectResult();
+	DEBUG_WMS("Connection result: ");
+	DEBUG_WMF(connRes);
+	//not connected, WPS enabled, no pass - first attempt
+	
+	if (_tryWPS && connRes != WL_CONNECTED && wifi.password == "") {
+		startWPS();
+		//should be connected at the end of WPS
+		connRes = waitForConnectResult();
+	}
+
+	return connRes;
+}
+
+uint8_t IoesptProvisioning::waitForConnectResult() {
+	if (_connectTimeout == 0) {
+		return WiFi.waitForConnectResult();
+	}
+	else {
+		DEBUG_WMSL(F("Waiting for connection result with time out"));
+		unsigned long start = millis();
+		boolean keepConnecting = true;
+		uint8_t status;
+		while (keepConnecting) {
+			status = WiFi.status();
+			if (millis() > start + _connectTimeout) {
+				keepConnecting = false;
+				DEBUG_WMSL(F("Connection timed out"));
+			}
+			if (status == WL_CONNECTED || status == WL_CONNECT_FAILED) {
+				keepConnecting = false;
+			}
+			delay(100);
+		}
+		return status;
+	}
+}
+
+void IoesptProvisioning::startWPS() {
+	DEBUG_WMSL("START WPS");
+	WiFi.beginWPSConfig();
+	DEBUG_WMSL("END WPS");
 }
 
 /////////////////////
@@ -125,7 +215,7 @@ void IoesptProvisioning::handleSetWifiSettings()
 {
 	DEBUG_WMSL("handleSetWifiSettings");
 
-	StaticJsonBuffer<10> jsonBuffer;
+	StaticJsonBuffer<400> jsonBuffer;
 
 	JsonObject& root = jsonBuffer.parseObject(server->arg("plain"));
 
@@ -138,6 +228,8 @@ void IoesptProvisioning::handleSetWifiSettings()
 			settingsChanged();
 
 		server->send(200, "text/json", "{success:true}");
+
+		connect = true;
 	}
 	else
 		server->send(400, "text/json", "{error:'unable to parse JSON'}");
