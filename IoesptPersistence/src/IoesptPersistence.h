@@ -24,6 +24,7 @@ public:
 	IoesptPersistance();
 
 	void saveSettings(SaveCallbackType callback);
+	
 	void loadSettings(LoadCallbackType callback);
 
 private:

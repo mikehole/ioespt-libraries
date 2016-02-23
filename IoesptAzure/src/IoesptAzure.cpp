@@ -119,9 +119,7 @@ void IoesptAzure::handleGetSettings() {
 	saveSettings(root);
 
 	String out;
-
 	int length = root.printTo(out);
-
 	server->send(200, "text/plain", out);
 }
 

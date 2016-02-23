@@ -8,9 +8,10 @@
 
 IoesptProvisioning::IoesptProvisioning()
 {
-	wifi.ssid = "virginmedia5388578";
-	wifi.password = "wtjjldlr";
 }
+
+/////////////////////
+//Settings
 
 void IoesptProvisioning::loadSettings(JsonObject& root)
 {
@@ -22,11 +23,11 @@ void IoesptProvisioning::loadSettings(JsonObject& root)
 
 		JsonObject& wifiSettings = root["wifiSettings"];
 
-		wifi.ssid = wifiSettings.get<const char*>("ssid");
+		wifi.ssid = wifiSettings.get<String>("ssid");
 
 		DEBUG_WMS("ssid : "); DEBUG_WMF(wifi.ssid);
 
-		wifi.password = wifiSettings.get<const char*>("password");
+		wifi.password = wifiSettings.get<String>("password");
 
 		DEBUG_WMS("password : "); DEBUG_WMF(wifi.password);
 	}
@@ -38,15 +39,17 @@ void IoesptProvisioning::loadSettings(JsonObject& root)
 
 void IoesptProvisioning::saveSettings(JsonObject& root)
 {
-	JsonObject&	azureSettings = root.createNestedObject("wifiSettings");
+	JsonObject&	wifiSettings = root.createNestedObject("wifiSettings");
 
-	azureSettings.set<const char*>("ssid", wifi.ssid);
-	azureSettings.set<const char*>("password", wifi.password);
+	wifiSettings.set<String>("ssid", wifi.ssid);
+	wifiSettings.set<String>("password", wifi.password);
 }
 
+/////////////////////
+//Portal
 
-void IoesptProvisioning::setupConfigPortal() {
-
+void IoesptProvisioning::setupConfigPortal() 
+{
 	server.reset(new ESP8266WebServer(80));
 
 	DEBUG_WMSL(F(""));
@@ -83,11 +86,11 @@ void IoesptProvisioning::setupConfigPortal() {
 	DEBUG_WMSL(F("AP IP address: "));
 	DEBUG_WMSL(WiFi.softAPIP());
 
-	/* Setup web pages: root, wifi config pages, SO captive portal detectors and not found. */
-
-	server->on("/", std::bind(&IoesptProvisioning::handleRoot, this));
-
 	server->on("/listaccesspoints", std::bind(&IoesptProvisioning::listAccessPoints, this));
+
+	server->on("/wifisettings", HTTP_GET,std::bind(&IoesptProvisioning::handleGetWifiSettings, this));
+
+	server->on("/wifisettings", HTTP_POST, std::bind(&IoesptProvisioning::handleSetWifiSettings, this));
 
 	server->begin(); // Web server start
 
@@ -99,12 +102,43 @@ void IoesptProvisioning::setupConfigPortal() {
 	}
 }
 
-void IoesptProvisioning::handleRoot() {
+/////////////////////
+//Web functions
 
-	DEBUG_WMSL(F("Handle root"));
 
-	server->send(200, "text/plain", "hello from esp8266!");
+void IoesptProvisioning::handleGetWifiSettings() 
+{
+	DEBUG_WMSL("handleGetWifiSettings");
+
+	StaticJsonBuffer<1000> jsonBuffer;
+
+	JsonObject& root = jsonBuffer.createObject();
+
+	saveSettings(root);
+
+	String out;
+	int length = root.printTo(out);
+	server->send(200, "text/json", out);
 }
+
+void IoesptProvisioning::handleSetWifiSettings() 
+{
+	DEBUG_WMSL("handleSetWifiSettings");
+
+	wifi.ssid = server->arg("ssid");
+
+	DEBUG_WMS("ssid : "); DEBUG_WMF(wifi.ssid);
+
+	wifi.password = server->arg("password");
+
+	DEBUG_WMS("password : "); DEBUG_WMF(wifi.password);
+
+	if (settingsChanged != NULL)
+		settingsChanged();
+
+	server->send(200);
+}
+
 
 void IoesptProvisioning::listAccessPoints() {
 

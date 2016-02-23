@@ -14,9 +14,11 @@
 #include <ArduinoJson.h>
 
 struct WifiConfig {
-	const char *ssid;
-	const char *password;
+	String ssid = "";
+	String password = "";
 };
+
+typedef void(*SettingsChangedCallbackType)();
 
 class IoesptProvisioning
 {
@@ -31,10 +33,15 @@ public:
 
 	void saveSettings(JsonObject& root);
 
+	SettingsChangedCallbackType settingsChanged;
+
 private:
 
 	//Web server handlers
-	void handleRoot();
+	void handleGetWifiSettings();
+
+	void handleSetWifiSettings();
+
 	void listAccessPoints();
 
 	//Utility
