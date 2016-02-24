@@ -97,6 +97,8 @@ bool IoesptProvisioning::getConnected()
 	DEBUG_WMSL(F("AP IP address: "));
 	DEBUG_WMSL(WiFi.softAPIP());
 
+	server->on("/", std::bind(&IoesptProvisioning::handleRoot, this));
+
 	server->on("/listaccesspoints", std::bind(&IoesptProvisioning::listAccessPoints, this));
 
 	server->on("/wifisettings", HTTP_GET,std::bind(&IoesptProvisioning::handleGetWifiSettings, this));
@@ -195,6 +197,23 @@ void IoesptProvisioning::startWPS() {
 /////////////////////
 //Web functions
 
+void IoesptProvisioning::handleRoot()
+{
+	DEBUG_WMSL("handleRoot");
+
+	StaticJsonBuffer<200> jsonBuffer;
+
+	JsonObject& root = jsonBuffer.createObject();
+
+	root["moduleType"] = device.ModuleType;
+	root["chipId"] = device.ChipId;
+	root["firmwareName"] = device.FirmwareName;
+	root["firmwareVersion"] = device.FirmwareVersion;
+
+	String out;
+	int length = root.printTo(out);
+	server->send(200, "text/json", out);
+}
 
 void IoesptProvisioning::handleGetWifiSettings() 
 {

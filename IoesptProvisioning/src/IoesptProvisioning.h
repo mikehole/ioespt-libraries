@@ -18,12 +18,21 @@ struct WifiConfig {
 	String password = "";
 };
 
+struct DeviceDetails {
+	String ModuleType = "";
+	String FirmwareName = "";
+	String FirmwareVersion = "";
+	String ChipId = "";
+};
+
 typedef void(*SettingsChangedCallbackType)();
 
 class IoesptProvisioning
 {
 public:
 	WifiConfig wifi;
+
+	DeviceDetails device;
 
 	IoesptProvisioning();
 
@@ -51,6 +60,8 @@ private:
 	void startWPS();
 
 	//Web server handlers
+	void handleRoot();
+
 	void handleGetWifiSettings();
 
 	void handleSetWifiSettings();
@@ -65,7 +76,7 @@ private:
 	unsigned long timeout = 0;
 	unsigned long start = 0;
 
-	const char*   _apName = "iotespt";
+	const char*   _apName = "ioespt-thing";
 	const char*   _apPassword = NULL;
 
 	IPAddress     _ap_static_ip;
