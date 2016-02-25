@@ -71,7 +71,6 @@ bool IoesptProvisioning::getConnected()
 	start = millis();
 
 	DEBUG_WMSL(F("Configuring access point... "));
-	DEBUG_WMSL(_apName);
 
 	if (_apPassword != NULL) {
 		if (strlen(_apPassword) < 8 || strlen(_apPassword) > 63) {
@@ -88,11 +87,17 @@ bool IoesptProvisioning::getConnected()
 		WiFi.softAPConfig(_ap_static_ip, _ap_static_gw, _ap_static_sn);
 	}
 
+	String nameToUse = String(_apName);
+	nameToUse += "-";
+	nameToUse += device.ChipId;
+
+	DEBUG_WMSL(nameToUse);
+
 	if (_apPassword != NULL) {
-		WiFi.softAP(_apName, _apPassword);//password option
+		WiFi.softAP(&nameToUse[0u], _apPassword);//password option
 	}
 	else {
-		WiFi.softAP(_apName);
+		WiFi.softAP(&nameToUse[0u]);
 	}
 
 	delay(500); // Without delay I've seen the IP address blank
@@ -326,7 +331,7 @@ IOESPTPROVISIONING_VERBOSE_OUT
 template <typename Generic>
 void IoesptProvisioning::DEBUG_WMSL(Generic text) {
 #ifdef IOESPTPROVISIONING_VERBOSE_OUT
-	Serial.print("*IOESPT-Settings: ");
+	Serial.print("*IOESPT-IoesptProvisioning: ");
 	Serial.println(text);
 #endif // IOESPTPROVISIONING_VERBOSE_OUT
 }
@@ -334,7 +339,7 @@ void IoesptProvisioning::DEBUG_WMSL(Generic text) {
 template <typename Generic>
 void IoesptProvisioning::DEBUG_WMS(Generic text) {
 #ifdef IOESPTPROVISIONING_VERBOSE_OUT
-	Serial.print("*IOESPT-Settings: ");
+	Serial.print("*IOESPT-IoesptProvisioning: ");
 	Serial.print(text);
 #endif // IOESPTPROVISIONING_VERBOSE_OUT
 }
