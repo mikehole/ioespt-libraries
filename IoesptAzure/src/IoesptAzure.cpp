@@ -297,7 +297,7 @@ void IoesptAzure::DEBUG_WMSL(Generic text) {
 template <typename Generic>
 void IoesptAzure::DEBUG_WMS(Generic text) {
 #ifdef IOESPAZURE_VERBOSE_OUT
-	Serial.print("*IOESPT-IoesptAzure: ");
+	Serial.print("*IOESPT-IoesptAzure: ");  
 	Serial.print(text);
 #endif // IOESPAZURE_VERBOSE_OUT
 }

@@ -89,7 +89,7 @@ bool IoesptProvisioning::getConnected()
 
 	String nameToUse = String(_apName);
 	nameToUse += "-";
-	nameToUse += device.ChipId;
+	nameToUse += device.ChipId;  
 
 	DEBUG_WMSL(nameToUse);
 

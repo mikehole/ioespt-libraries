@@ -74,7 +74,7 @@ void IoesptPersistance::saveSettings(SaveCallbackType callback)
 template <typename Generic>
 void IoesptPersistance::DEBUG_WMSL(Generic text) {
 #ifdef IOESPTPERSISTENCE_VERBOSE_OUT
-	Serial.print("*IOESPT-Settings: ");
+	Serial.print("*IOESPT-IoesptPersistance: ");
 	Serial.println(text);
 #endif // IOESPTPERSISTENCE_VERBOSE_OUT
 }
@@ -82,7 +82,7 @@ void IoesptPersistance::DEBUG_WMSL(Generic text) {
 template <typename Generic>
 void IoesptPersistance::DEBUG_WMS(Generic text) {
 #ifdef IOESPTPERSISTENCE_VERBOSE_OUT
-	Serial.print("*IOESPT-Settings: ");
+	Serial.print("*IOESPT-IoesptPersistance: ");
 	Serial.print(text);
 #endif // IOESPTPERSISTENCE_VERBOSE_OUT
 }
