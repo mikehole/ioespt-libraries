@@ -3,6 +3,8 @@
 #ifndef _IOESPAZURE_h
 #define _IOESPAZURE_h
 
+#define IOESPAZURE_VERBOSE_OUT
+
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else

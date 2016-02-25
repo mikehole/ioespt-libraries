@@ -288,22 +288,30 @@ void IoesptAzure::publishToAzure(String data) {
 
 template <typename Generic>
 void IoesptAzure::DEBUG_WMSL(Generic text) {
-	Serial.print("*IOESPT-Azure: ");
+#ifdef IOESPAZURE_VERBOSE_OUT
+	Serial.print("*IOESPT-Settings: ");
 	Serial.println(text);
+#endif // IOESPAZURE_VERBOSE_OUT
 }
 
 template <typename Generic>
 void IoesptAzure::DEBUG_WMS(Generic text) {
-	Serial.print("*IOESPT-Azure: ");
+#ifdef IOESPAZURE_VERBOSE_OUT
+	Serial.print("*IOESPT-Settings: ");
 	Serial.print(text);
+#endif // IOESPAZURE_VERBOSE_OUT
 }
 
 template <typename Generic>
 void IoesptAzure::DEBUG_WMC(Generic text) {
+#ifdef IOESPAZURE_VERBOSE_OUT
 	Serial.print(text);
+#endif // IOESPAZURE_VERBOSE_OUT
 }
 
 template <typename Generic>
 void IoesptAzure::DEBUG_WMF(Generic text) {
+#ifdef IOESPAZURE_VERBOSE_OUT
 	Serial.println(text);
+#endif // IOESPAZURE_VERBOSE_OUT
 }

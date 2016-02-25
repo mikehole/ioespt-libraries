@@ -3,6 +3,9 @@
 #ifndef _IOESPTPROVISIONING_h
 #define _IOESPTPROVISIONING_h
 
+#define IOESPTPROVISIONING_VERBOSE_OUT
+
+
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else

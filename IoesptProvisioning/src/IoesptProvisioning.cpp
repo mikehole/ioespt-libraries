@@ -29,7 +29,7 @@ void IoesptProvisioning::loadSettings(JsonObject& root)
 
 		wifi.password = wifiSettings.get<String>("password");
 
-		DEBUG_WMS("password : "); DEBUG_WMF(wifi.password);
+		DEBUG_WMS("password : "); DEBUG_WMF("******");
 	}
 	else
 	{
@@ -42,7 +42,10 @@ void IoesptProvisioning::saveSettings(JsonObject& root)
 	JsonObject&	wifiSettings = root.createNestedObject("wifiSettings");
 
 	wifiSettings.set<String>("ssid", wifi.ssid);
+	DEBUG_WMS("ssid : "); DEBUG_WMF(wifi.ssid);
+
 	wifiSettings.set<String>("password", wifi.password);
+	DEBUG_WMS("password : "); DEBUG_WMF("******");
 }
 
 /////////////////////
@@ -318,24 +321,34 @@ int IoesptProvisioning::getRSSIasQuality(int RSSI) {
 ///////////////////////////
 // Diagnostics
 
+IOESPTPROVISIONING_VERBOSE_OUT
+
 template <typename Generic>
 void IoesptProvisioning::DEBUG_WMSL(Generic text) {
-	Serial.print("*IOESPT-Provisioning: ");
+#ifdef IOESPTPROVISIONING_VERBOSE_OUT
+	Serial.print("*IOESPT-Settings: ");
 	Serial.println(text);
+#endif // IOESPTPROVISIONING_VERBOSE_OUT
 }
 
 template <typename Generic>
 void IoesptProvisioning::DEBUG_WMS(Generic text) {
-	Serial.print("*IOESPT-Provisioning: ");
+#ifdef IOESPTPROVISIONING_VERBOSE_OUT
+	Serial.print("*IOESPT-Settings: ");
 	Serial.print(text);
+#endif // IOESPTPROVISIONING_VERBOSE_OUT
 }
 
 template <typename Generic>
 void IoesptProvisioning::DEBUG_WMC(Generic text) {
+#ifdef IOESPTPROVISIONING_VERBOSE_OUT
 	Serial.print(text);
+#endif // IOESPTPROVISIONING_VERBOSE_OUT
 }
 
 template <typename Generic>
 void IoesptProvisioning::DEBUG_WMF(Generic text) {
+#ifdef IOESPTPROVISIONING_VERBOSE_OUT
 	Serial.println(text);
+#endif // IOESPTPROVISIONING_VERBOSE_OUT
 }
