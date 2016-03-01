@@ -3,7 +3,7 @@
 #ifndef _IOESPTPERSISTENCE_h
 #define _IOESPTPERSISTENCE_h
 
-//#define IOESPTPERSISTENCE_VERBOSE_OUT
+#define IOESPTPERSISTENCE_VERBOSE_OUT
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"

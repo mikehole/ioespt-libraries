@@ -88,22 +88,14 @@ void IoesptAzure::saveSettings(JsonObject& root)
 }
 
 
-void IoesptAzure::start()
+void IoesptAzure::start(ESP8266WebServer* webServer)
 {
-	server.reset(new ESP8266WebServer(8080));
-
+	server = webServer;
 	server->on("/getsettings", std::bind(&IoesptAzure::handleGetSettings, this));
 	server->on("/putsettings", std::bind(&IoesptAzure::handleSetSettings, this));
 
-	server->begin();
-	DEBUG_WMSL("HTTP server started");
+	DEBUG_WMSL("HTTP server handlers added");
 }
-
-void IoesptAzure::processRequests()
-{
-	server->handleClient();
-}
-
 
 ///////////////////////////
 // Server Handlers
@@ -120,6 +112,7 @@ void IoesptAzure::handleGetSettings() {
 
 	String out;
 	int length = root.printTo(out);
+
 	server->send(200, "text/plain", out);
 }
 

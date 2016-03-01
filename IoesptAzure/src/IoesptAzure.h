@@ -61,9 +61,7 @@ public:
 
 	IoesptAzure();
 
-	void processRequests();
-
-	void start();
+	void start(ESP8266WebServer* webServer);
 
 	void publishToAzure(String data);
 
@@ -85,6 +83,8 @@ private:
 
 	WiFiClientSecure tlsClient;
 
+	ESP8266WebServer* server;
+
 	// Azure IoT Hub Settings
 	const char* TARGET_URL = "/devices/";
 	const char* IOT_HUB_END_POINT = "/messages/events?api-version=2015-08-15-preview";
@@ -100,8 +100,6 @@ private:
 	//Request Handling
 	void handleGetSettings();
 	void handleSetSettings();
-
-	std::unique_ptr<ESP8266WebServer> server;
 
 	//Diagnostics
 	template <typename Generic>
