@@ -254,12 +254,12 @@ void IoesptProvisioning::handleSetWifiSettings()
 		if (settingsChanged != NULL)
 			settingsChanged();
 
-		server->send(200, "text/json", "{success:true}");
+		server->send(200, "text/json", "{'success':'true'}");
 
 		connect = true;
 	}
 	else
-		server->send(400, "text/json", "{error:'unable to parse JSON'}");
+		server->send(400, "text/json", "{'error':'unable to parse JSON'}");
 }
 
 
