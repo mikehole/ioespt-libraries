@@ -27,7 +27,6 @@ String IoesptAzure::urlEncode(const char* msg)
 
 IoesptAzure::IoesptAzure()
 {
-
 	device.boardType = Other;            // BoardType enumeration: NodeMCU, WeMos, SparkfunThing, Other (defaults to Other). This determines pin number of the onboard LED for wifi and publish status. Other means no LED status  
 	device.deepSleepSeconds = 0;         // if greater than zero with call ESP8266 deep sleep (default is 0 disabled). GPIO16 needs to be tied to RST to wake from deepSleep. Causes a reset, execution restarts from beginning of sketch 
 	
@@ -46,45 +45,45 @@ IoesptAzure::IoesptAzure()
 
 void IoesptAzure::loadSettings(JsonObject& root)
 {
-	DEBUG_WMS("Loading settings. azureSettings: ");
-	
-	if (root.containsKey("azureSettings"))
-	{
-		DEBUG_WMF("Found");
+	//DEBUG_WMS("Loading settings. azureSettings: ");
+	//
+	//if (root.containsKey("azureSettings"))
+	//{
+	//	DEBUG_WMF(F("Found"));
 
-		JsonObject& azureSettings = root["azureSettings"];
+	//	JsonObject& azureSettings = root["azureSettings"];
 
-		DEBUG_WMSL("Boo!");
+	//	DEBUG_WMSL(F("Boo!"));
 
-		cloud.host = azureSettings.get<const char*>("host");
+	//	cloud.host = azureSettings.get<const char*>("host");
 
-		DEBUG_WMS("Host : "); DEBUG_WMF( cloud.host );
+	//	DEBUG_WMS(F("Host : ")); DEBUG_WMF( cloud.host );
 
-		cloud.id = azureSettings.get<const char*>("id");
+	//	cloud.id = azureSettings.get<const char*>("id");
 
-		DEBUG_WMS("id : "); DEBUG_WMF(cloud.id);
+	//	DEBUG_WMS(F("id : ")); DEBUG_WMF(cloud.id);
 
-		String keyString = azureSettings.get<String>("key");
-		
-		cloud.key = &keyString[0u];
+	//	String keyString = azureSettings.get<String>("key");
+	//	
+	//	cloud.key = &keyString[0u];
 
-		DEBUG_WMS("key : "); DEBUG_WMF(cloud.key);
+	//	DEBUG_WMS(F("key : ")); DEBUG_WMF(cloud.key);
 
-		//cloud.key = azureSettings.get<char*>("key");
-	}
-	else
-	{
-		DEBUG_WMF("Not Found");
-	}
+	//	//cloud.key = azureSettings.get<char*>("key");
+	//}
+	//else
+	//{
+	//	DEBUG_WMF(F("Not Found"));
+	//}
 }
 
 void IoesptAzure::saveSettings(JsonObject& root)
 {
-	JsonObject&	azureSettings = root.createNestedObject("azureSettings");
+	//JsonObject&	azureSettings = root.createNestedObject("azureSettings");
 
-	azureSettings.set<const char*>("host", cloud.host);
-	azureSettings.set<char*>("key", cloud.key);
-	azureSettings.set<const char*>("id", cloud.id);
+	//azureSettings.set<const char*>("host", cloud.host);
+	//azureSettings.set<char*>("key", cloud.key);
+	//azureSettings.set<const char*>("id", cloud.id);
 }
 
 
@@ -94,7 +93,7 @@ void IoesptAzure::start(ESP8266WebServer* webServer)
 	server->on("/getsettings", std::bind(&IoesptAzure::handleGetSettings, this));
 	server->on("/putsettings", std::bind(&IoesptAzure::handleSetSettings, this));
 
-	DEBUG_WMSL("HTTP server handlers added");
+	DEBUG_WMSL(F("HTTP server handlers added"));
 }
 
 ///////////////////////////
@@ -117,10 +116,8 @@ void IoesptAzure::handleGetSettings() {
 }
 
 void IoesptAzure::handleSetSettings() {
-
 	DEBUG_WMSL(F("handleSetSettings"));
-
-	server->send(200, "text/plain", "hello from esp8266!");
+	server->send(200);
 }
 
 ///////////////////////////
@@ -156,19 +153,19 @@ void IoesptAzure::initialiseEventHub() {
 void IoesptAzure::connectToAzure() {
 	delay(500); // give network connection a moment to settle
 	DEBUG_WMS(cloud.id);
-	DEBUG_WMC(" connecting to ");
+	DEBUG_WMC(F(" connecting to "));
 	DEBUG_WMF(cloud.host);
 	
 	if (WiFi.status() != WL_CONNECTED) { return; }
 	
 	if (!tlsClient.connect(cloud.host, 443)) {      // Use WiFiClientSecure class to create TLS connection
-		DEBUG_WMS("Host connection failed.  WiFi IP Address: ");
+		DEBUG_WMS(F("Host connection failed.  WiFi IP Address: "));
 		DEBUG_WMF(WiFi.localIP());
 
 		delay(2000);
 	}
 	else {
-		DEBUG_WMSL("Host connected");
+		DEBUG_WMSL(F("Host connected"));
 		yield(); // give firmware some time 
 				 //    delay(250); // give network connection a moment to settle
 	}
@@ -262,15 +259,15 @@ void IoesptAzure::publishToAzure(String data) {
 		}
 	} while (chunk.length() > 0 && ++limit < 100);
 
-	DEBUG_WMS("Bytes sent ");
+	DEBUG_WMS(F("Bytes sent "));
 	DEBUG_WMC(bytesWritten);
-	DEBUG_WMC(", Memory ");
+	DEBUG_WMC(F(", Memory "));
 	DEBUG_WMC(ESP.getFreeHeap());
-	DEBUG_WMC(" Message ");
+	DEBUG_WMC(F(" Message "));
 	DEBUG_WMC(sendCount);
-	DEBUG_WMC(", Response chunks ");
+	DEBUG_WMC(F(", Response chunks "));
 	DEBUG_WMC(limit);
-	DEBUG_WMC(", Response code: ");
+	DEBUG_WMC(F(", Response code: "));
 
 	if (response.length() > 12) { DEBUG_WMF(response.substring(9, 12)); }
 	else { DEBUG_WMF("unknown"); }
@@ -282,7 +279,7 @@ void IoesptAzure::publishToAzure(String data) {
 template <typename Generic>
 void IoesptAzure::DEBUG_WMSL(Generic text) {
 #ifdef IOESPAZURE_VERBOSE_OUT
-	Serial.print("*IOESPT-IoesptAzure: ");
+	Serial.print(F("*IOESPT-IoesptAzure: "));
 	Serial.println(text);
 #endif // IOESPAZURE_VERBOSE_OUT
 }
@@ -290,7 +287,7 @@ void IoesptAzure::DEBUG_WMSL(Generic text) {
 template <typename Generic>
 void IoesptAzure::DEBUG_WMS(Generic text) {
 #ifdef IOESPAZURE_VERBOSE_OUT
-	Serial.print("*IOESPT-IoesptAzure: ");  
+	Serial.print(F("*IOESPT-IoesptAzure: "));
 	Serial.print(text);
 #endif // IOESPAZURE_VERBOSE_OUT
 }
