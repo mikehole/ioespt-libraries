@@ -122,6 +122,10 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
         } else {
             result = _client->connect(this->ip, this->port);
         }
+
+		Serial.print("result : ");
+		Serial.println( result );
+
         if (result == 1) {
             nextMsgId = 1;
             // Leave room in the buffer for header and variable length field
@@ -186,12 +190,23 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
             uint8_t llen;
             uint16_t len = readPacket(&llen);
 
+			Serial.print("buffer : ");
+			Serial.print(buffer[0]);
+			Serial.print(",");
+			Serial.print(buffer[1]);
+			Serial.print(",");
+			Serial.print(buffer[2]);
+			Serial.print(",");
+			Serial.println(buffer[3]);
+
             if (len == 4) {
                 if (buffer[3] == 0) {
                     lastInActivity = millis();
                     pingOutstanding = false;
                     _state = MQTT_CONNECTED;
-                    return true;
+					
+					Serial.println("Return 1");
+					return true;
                 } else {
                     _state = buffer[3];
                 }
@@ -202,7 +217,9 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
         }
         return false;
     }
-    return true;
+
+	Serial.println("Return 2");
+	return true;
 }
 
 // reads a byte into result
@@ -541,6 +558,10 @@ boolean PubSubClient::connected() {
         rc = false;
     } else {
         rc = (int)_client->connected();
+
+		Serial.println("Client Not Connected!");
+
+
         if (!rc) {
             if (this->_state == MQTT_CONNECTED) {
                 this->_state = MQTT_CONNECTION_LOST;
