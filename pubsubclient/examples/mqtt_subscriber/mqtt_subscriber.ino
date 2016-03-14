@@ -1,9 +1,7 @@
 /*
- Basic MQTT example with Authentication
- 
-  - connects to an MQTT server, providing username
-    and password
-  - publishes "hello world" to the topic "outTopic"
+ MQTT subscriber example
+
+  - connects to an MQTT server
   - subscribes to the topic "inTopic"
 */
 
@@ -16,8 +14,21 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
+#define BUFFER_SIZE 100
+
 void callback(const MQTT::Publish& pub) {
-  // handle message arrived
+  Serial.print(pub.topic());
+  Serial.print(" => ");
+  if (pub.has_stream()) {
+    uint8_t buf[BUFFER_SIZE];
+    int read;
+    while (read = pub.payload_stream()->read(buf, BUFFER_SIZE)) {
+      Serial.write(buf, read);
+    }
+    pub.payload_stream()->stop();
+    Serial.println("");
+  } else
+    Serial.println(pub.payload_string());
 }
 
 WiFiClient wclient;
@@ -45,15 +56,9 @@ void loop() {
 
   if (WiFi.status() == WL_CONNECTED) {
     if (!client.connected()) {
-      Serial.println("Connecting to MQTT server");
-      if (client.connect(MQTT::Connect("arduinoClient")
-			 .set_auth("testeruser", "testpass"))) {
-        Serial.println("Connected to MQTT server");
+      if (client.connect("arduinoClient")) {
 	client.set_callback(callback);
-	client.publish("outTopic","hello world");
 	client.subscribe("inTopic");
-      } else {
-        Serial.println("Could not connect to MQTT server");   
       }
     }
 
@@ -61,4 +66,3 @@ void loop() {
       client.loop();
   }
 }
-

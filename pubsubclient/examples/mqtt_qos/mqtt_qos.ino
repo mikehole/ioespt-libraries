@@ -1,10 +1,9 @@
 /*
- Basic MQTT example with Authentication
- 
-  - connects to an MQTT server, providing username
-    and password
-  - publishes "hello world" to the topic "outTopic"
-  - subscribes to the topic "inTopic"
+ MQTT with QoS example
+
+  - connects to an MQTT server
+  - publishes "hello world" to the topic "outTopic" with a variety of QoS values
+
 */
 
 #include <ESP8266WiFi.h>
@@ -45,15 +44,15 @@ void loop() {
 
   if (WiFi.status() == WL_CONNECTED) {
     if (!client.connected()) {
-      Serial.println("Connecting to MQTT server");
-      if (client.connect(MQTT::Connect("arduinoClient")
-			 .set_auth("testeruser", "testpass"))) {
-        Serial.println("Connected to MQTT server");
+      if (client.connect("arduinoClient")) {
 	client.set_callback(callback);
-	client.publish("outTopic","hello world");
-	client.subscribe("inTopic");
-      } else {
-        Serial.println("Could not connect to MQTT server");   
+	client.publish("outTopic", "hello world qos=0");	// Simple publish with qos=0
+
+	client.publish(MQTT::Publish("outTopic", "hello world qos=1")
+		       .set_qos(1));
+
+	client.publish(MQTT::Publish("outTopic", "hello world qos=2")
+		       .set_qos(2));
       }
     }
 

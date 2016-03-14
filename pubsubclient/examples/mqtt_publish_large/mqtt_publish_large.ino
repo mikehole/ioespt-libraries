@@ -1,10 +1,8 @@
 /*
- Basic MQTT example with Authentication
- 
-  - connects to an MQTT server, providing username
-    and password
-  - publishes "hello world" to the topic "outTopic"
-  - subscribes to the topic "inTopic"
+ Large publish message MQTT example
+
+  - connects to an MQTT server
+  - publishes a large string of text to the topic "outTopic"
 */
 
 #include <ESP8266WiFi.h>
@@ -16,10 +14,6 @@ const char *pass =	"yyyyyyyy";		//
 // Update these with values suitable for your network.
 IPAddress server(172, 16, 0, 2);
 
-void callback(const MQTT::Publish& pub) {
-  // handle message arrived
-}
-
 WiFiClient wclient;
 PubSubClient client(wclient, server);
 
@@ -29,6 +23,21 @@ void setup() {
   delay(10);
   Serial.println();
   Serial.println();
+}
+
+bool write_payload(Client& payload_stream) {
+  char buf[64];
+  memset(buf, 32, 64);
+  for (int l = 0; l < 1024; l++) {
+    int len = sprintf(buf, "%d", l);
+    buf[len] = 32;
+    buf[63] = '\n';
+    uint32_t sent = payload_stream.write((const uint8_t*)buf, 64);
+    if (sent < 64)
+      return false;
+  }
+  Serial.println("Published large message.");
+  return true;
 }
 
 void loop() {
@@ -45,15 +54,8 @@ void loop() {
 
   if (WiFi.status() == WL_CONNECTED) {
     if (!client.connected()) {
-      Serial.println("Connecting to MQTT server");
-      if (client.connect(MQTT::Connect("arduinoClient")
-			 .set_auth("testeruser", "testpass"))) {
-        Serial.println("Connected to MQTT server");
-	client.set_callback(callback);
-	client.publish("outTopic","hello world");
-	client.subscribe("inTopic");
-      } else {
-        Serial.println("Could not connect to MQTT server");   
+      if (client.connect("arduinoClient")) {
+	client.publish("outTopic", write_payload, 65536);
       }
     }
 
