@@ -376,6 +376,29 @@ namespace MQTT {
     _payload(NULL), _payload_len(0),
     _payload_mine(false)
   {
+	Serial.println("Dumping Data...");
+
+	//Dump the whole of the data
+	int col = 0;
+	uint32_t x = 0;
+	for (x = 0; x < length; x++)
+	{
+		Serial.print("[");
+		Serial.print(data[x], HEX);
+		Serial.print(":");
+		Serial.print((char)data[x]);
+		Serial.print("]");
+
+		col++;
+
+		if (col == 7)
+		{
+			col = 0;
+			Serial.println();
+		}
+	}
+	Serial.println();
+
     uint32_t pos = 0;
     _topic = read<String>(data, pos);
     if (qos() > 0)
@@ -437,10 +460,12 @@ namespace MQTT {
 
   String Publish::payload_string(void) const {
     String str;
-    str.reserve(_payload_len);
+    str.reserve(_payload_len );
 	for (uint32_t i = 0; i < _payload_len; i++)
 	{
-		Serial.println(_payload[i]);
+		//Serial.print(_payload[i], HEX);
+		//Serial.print(" ");
+		//Serial.println((char)_payload[i]);
 
 		str += (char)_payload[i];
 	}
